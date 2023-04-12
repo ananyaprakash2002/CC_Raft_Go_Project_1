@@ -1,7 +1,7 @@
 # Raft-implementation-using-Go-lang
 ## Cloud Computing project
 
-* Implementing 4 specific functionalities:
+Implementing 4 specific functionalities:
 
 * the becomeFollower function entirely.
 * the logic for a follower node to handle a received RequestVote function from a candidate.
