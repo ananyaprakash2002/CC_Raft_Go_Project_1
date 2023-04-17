@@ -107,14 +107,9 @@ func (this *RaftNode) broadcastHeartbeats() {
 						// IMPLEMENT THE UPDATE LOGIC FOR THIS.
 						//-------------------------------------------------------------------------------------------/
 						// TODO
+						this.nextIndex[peerId] = currentPeer_nextIndex + len(entries)
+						this.matchIndex[peerId] = this.nextIndex[peerId] - 1
 						//-------------------------------------------------------------------------------------------/
-						this.nextIndex[peerId] = currentPeer_nextIndex
-                        this.matchIndex[peerId] = currentPeer_nextIndex - 1
-                    	}else {
-						    this.becomeFollower(reply.Term)
-							return
-							}
-
 
 						if (aeType == "Heartbeat" && LogHeartbeatMessages) || aeType == "AppendEntries" {
 							this.write_log("%s reply from NODE %d success: nextIndex := %v, matchIndex := %v", aeType, peerId, this.nextIndex, this.matchIndex)
@@ -127,26 +122,17 @@ func (this *RaftNode) broadcastHeartbeats() {
 						// Figure out how and where; HINT: look for a majority of matchCounts.
 
 						//-------------------------------------------------------------------------------------------/
-                        if reply.Success {
-                            this.commitIndex = currentPeer_nextIndex
-                            this.write_log("%s reply from NODE %d success: nextIndex := %v, matchIndex := %v", aeType, peerId, this.nextIndex, this.matchIndex)
-                        } else {
-                            this.commitIndex = oldCommitIndex
-                            this.write_log("%s reply from NODE %d failed: nextIndex := %v, matchIndex := %v", aeType, peerId, this.nextIndex, this.matchIndex)
-                        }
 						for i := this.commitIndex + 1; i < len(this.log); i++ {
 							if this.log[i].Term == this.currentTerm {
 								matchCount := 1 // Leader itself
 
 								for _, peerId := range this.peersIds {
-									if this.matchIndex[peerId] == i{ // TODO  // When should you update matchCount?
-
-                                                matchCount++
+									if this.matchIndex[peerId] >= i { // TODO  // When should you update matchCount?
+										matchCount++
 									}
 								}
 
 								if matchCount > len(this.peersIds)/2 { // TODO  // When should you update commitIndex to i?
-
 									this.commitIndex = i
 								}
 							}
@@ -167,15 +153,15 @@ func (this *RaftNode) broadcastHeartbeats() {
 
 						//-------------------------------------------------------------------------------------------/
 						// TODO
+						this.nextIndex[peerId]--
 						//-------------------------------------------------------------------------------------------/
-						this.nextIndex[peerId] = currentPeer_nextIndex
-                        this.matchIndex[peerId] = currentPeer_nextIndex - 1
-                        } 
-						
+
 						if (aeType == "Heartbeat" && LogHeartbeatMessages) || aeType == "AppendEntries" {
 							this.write_log("%s reply from NODE %d was failure; Hence, decrementing its nextIndex", aeType, peerId)
 						}
 					}
+				}
+			}
 		}(peerId)
 	}
 }
