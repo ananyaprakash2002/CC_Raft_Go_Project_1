@@ -1,13 +1,17 @@
 package raft
 
 import (
+	// "fmt"
 	"math/rand"
 	"time"
 )
 
-/* startElectionTimer implements an election timer. It should be launched whenever
+/*
+	startElectionTimer implements an election timer. It should be launched whenever
+
 we want to start a timer towards becoming a candidate in a new election.
-This function runs as a go routine */
+This function runs as a go routine
+*/
 func (this *RaftNode) startElectionTimer() {
 	timeoutDuration := time.Duration(3000+rand.Intn(3000)) * time.Millisecond
 	this.mu.Lock()
@@ -99,18 +103,18 @@ func (this *RaftNode) startElection() {
 				// You probably need to have implemented becomeFollower before this.
 
 				//-------------------------------------------------------------------------------------------/
-				if reply.Term > termWhenVoteRequested {
-					// TODO
-					this.write_log("term out of date in  RequestVoteReply")
+				if reply.Term > this.currentTerm { //TODO
+					this.currentTerm = reply.Term
 					this.becomeFollower(reply.Term)
-					return
-					
-				} else if reply.Term == termWhenVoteRequested {
-					// TODO
-					if reply.VoteGranted{
+				} else if reply.Term == termWhenVoteRequested { //TODO
+					if reply.VoteGranted {
 						votesReceived += 1
-						if votesReceived*2 >len(this.peersIds)+1 {
-							this.write_log("wins the election with %d votes",votesReceived)
+						// this.state = "Leader"
+						this.write_log("received a positive vote from %d (total: %d)", peerId, votesReceived)
+						if votesReceived >= len(this.peersIds)/2 {
+							// fmt.Println(votesReceived)
+							// fmt.Println(len(this.peersIds)/2)
+							this.write_log("got majority votes: %d; became Leader", votesReceived)
 							this.startLeader()
 							return
 						}
@@ -130,13 +134,12 @@ func (this *RaftNode) startElection() {
 func (this *RaftNode) becomeFollower(term int) {
 	this.write_log("became Follower with term=%d; log=%v", term, this.log)
 
-	// IMPLEMENT becomeFollower; do you need to start a goroutine here, maybe?
-	//-------------------------------------------------------------------------------------------/
 	// TODO
-	//-------------------------------------------------------------------------------------------/
+
+	// Reset votedFor to -1 and currentTerm to the term received as argument.
 	this.state = "Follower"
-    this.currentTerm = term
-    this.votedFor = -1
-    this.lastElectionTimerStartedTime = time.Now()
+	this.currentTerm = term
+	this.votedFor = -1
+	this.lastElectionTimerStartedTime = time.Now()
 	go this.startElectionTimer()
 }
