@@ -8,7 +8,6 @@ import (
 
 /*
 	startElectionTimer implements an election timer. It should be launched whenever
-
 we want to start a timer towards becoming a candidate in a new election.
 This function runs as a go routine
 */
@@ -109,19 +108,16 @@ func (this *RaftNode) startElection() {
 				} else if reply.Term == termWhenVoteRequested { //TODO
 					if reply.VoteGranted {
 						votesReceived += 1
-						// this.state = "Leader"
-						this.write_log("received a positive vote from %d (total: %d)", peerId, votesReceived)
+						this.write_log("positive vote received from %d; total_no of votes received: %d", peerId, votesReceived)
+
 						if votesReceived >= len(this.peersIds)/2 {
-							// fmt.Println(votesReceived)
-							// fmt.Println(len(this.peersIds)/2)
-							this.write_log("got majority votes: %d; became Leader", votesReceived)
+							this.write_log("Became Leader by receiving majority of votes: %d", votesReceived)
 							this.startLeader()
 							return
 						}
 					}
 				}
 				//-------------------------------------------------------------------------------------------/
-
 			}
 		}(peerId)
 	}
@@ -135,7 +131,6 @@ func (this *RaftNode) becomeFollower(term int) {
 	this.write_log("became Follower with term=%d; log=%v", term, this.log)
 
 	// TODO
-
 	// Reset votedFor to -1 and currentTerm to the term received as argument.
 	this.state = "Follower"
 	this.currentTerm = term
