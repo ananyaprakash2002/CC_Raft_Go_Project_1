@@ -1,7 +1,6 @@
 package raft
 
 import (
-	// "fmt"
 	"math/rand"
 	"time"
 )
