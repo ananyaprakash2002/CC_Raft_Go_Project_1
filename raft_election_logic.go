@@ -8,6 +8,7 @@ import (
 
 /*
 	startElectionTimer implements an election timer. It should be launched whenever
+
 we want to start a timer towards becoming a candidate in a new election.
 This function runs as a go routine
 */
@@ -100,15 +101,11 @@ func (this *RaftNode) startElection() {
 
 				// IMPLEMENT HANDLING THE VOTEREQUEST's REPLY;
 				// You probably need to have implemented becomeFollower before this.
-
 				//-------------------------------------------------------------------------------------------/
-				if reply.Term > this.currentTerm { //TODO
-					this.currentTerm = reply.Term
-					this.becomeFollower(reply.Term)
-				} else if reply.Term == termWhenVoteRequested { //TODO
+				if reply.Term == termWhenVoteRequested { //TODO
 					if reply.VoteGranted {
 						votesReceived += 1
-						this.write_log("positive vote received from %d; total_no of votes received: %d", peerId, votesReceived)
+						this.write_log(" %d has voted", peerId)
 
 						if votesReceived >= len(this.peersIds)/2 {
 							this.write_log("Became Leader by receiving majority of votes: %d", votesReceived)
@@ -116,25 +113,26 @@ func (this *RaftNode) startElection() {
 							return
 						}
 					}
+
+				} else if reply.Term >= this.currentTerm { //TODO
+					this.currentTerm = reply.Term
+					this.becomeFollower(reply.Term)
 				}
 				//-------------------------------------------------------------------------------------------/
 			}
 		}(peerId)
 	}
-
 	// Run another election timer, in case this election is not successful.
 	go this.startElectionTimer()
 }
 
 // becomeFollower sets a node to be a follower and resets its state.
 func (this *RaftNode) becomeFollower(term int) {
-	this.write_log("became Follower with term=%d; log=%v", term, this.log)
-
 	// TODO
-	// Reset votedFor to -1 and currentTerm to the term received as argument.
+	this.votedFor = -1
 	this.state = "Follower"
 	this.currentTerm = term
-	this.votedFor = -1
+	this.write_log("Term: %d has became Follower having log=%v", term, this.log)
 	this.lastElectionTimerStartedTime = time.Now()
 	go this.startElectionTimer()
 }
