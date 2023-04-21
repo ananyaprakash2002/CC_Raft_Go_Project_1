@@ -2,7 +2,7 @@ CLOUD COMPUTING - UE20CS351
 
 # Project: Implementing Raft Logic in Go
 
-NAME: Ananya Prakash
+NAME: Ananya Prakash    
 SRN: PES1UG20CS45
 
 ## Team Members:
