@@ -13,12 +13,15 @@ func Test1(t *testing.T) { // Simple Leader Election
 
 	firstLeaderId := cluster.getClusterLeader()
 	cluster.DisconnectPeer(firstLeaderId)
+	cluster.ReconnectPeer(firstLeaderId) //to bring back the peer which was disconnected as a follower
 
 	secondLeaderId := cluster.getClusterLeader()
 	cluster.DisconnectPeer(secondLeaderId)
+	cluster.ReconnectPeer(secondLeaderId)
 
 	thirdLeaderId := cluster.getClusterLeader()
 	cluster.DisconnectPeer(thirdLeaderId)
+	cluster.ReconnectPeer(thirdLeaderId)
 
 	sleepMs(3000)
 
