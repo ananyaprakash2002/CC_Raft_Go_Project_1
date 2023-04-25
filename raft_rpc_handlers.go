@@ -1,5 +1,4 @@
 package raft
-
 import "time"
 
 // Handles an incoming RPC RequestVote request
